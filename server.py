@@ -130,7 +130,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
             draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
 
-            img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
+            #img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
+            img = Image.fromarray(gray, mode='L')
             img.save(sio, "JPEG")
         else:
             camera.capture(sio, "jpeg", use_video_port=True)
