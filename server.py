@@ -115,6 +115,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
             t = clock()
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            fgmask = fgbg.apply(frame)
             #gray = cv2.equalizeHist(gray)
 
             #rects = detect(gray, cascade)
@@ -131,7 +133,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
 
             #img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
-            img = Image.fromarray(gray, mode='L')
+            img = Image.fromarray(fgmask, mode='L')
             img.save(sio, "JPEG")
         else:
             camera.capture(sio, "jpeg", use_video_port=True)
@@ -162,6 +164,8 @@ else:
     import picamera
     camera = picamera.PiCamera()
     camera.start_preview()
+
+fgbg = cv2.createBackgroundSubtractorMOG()
 
 resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 if args.resolution in resolutions:
