@@ -118,7 +118,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             #gray = cv2.equalizeHist(gray)
 
             #rects = detect(gray, cascade)
-            vis = gray.copy()
+            vis = img.copy()
             #draw_rects(vis, rects, (0, 255, 0))
             #if not self.nested.empty():
             #    for x1, y1, x2, y2 in rects:
