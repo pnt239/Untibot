@@ -165,7 +165,8 @@ else:
     camera = picamera.PiCamera()
     camera.start_preview()
 
-fgbg = cv2.bgsegm.createBackgroundSubtractorMOG2()
+#fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
+fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
 
 resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 if args.resolution in resolutions:
