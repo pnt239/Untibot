@@ -44,6 +44,27 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
+class MotionDetection(threading.Thread):
+    """
+    Thread checking URLs.
+    """
+
+    def __init__(self):
+        """
+        Constructor.
+
+        @param urls list of urls to check
+        @param output file to write urls output
+        """
+        threading.Thread.__init__(self)
+
+    def run(self):
+        """
+        Thread run method. Check URLs one by one.
+        """
+        while 1:
+            time.sleep(300)
+
 class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
@@ -77,6 +98,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         if message == "read_camera":
             self.camera_loop = PeriodicCallback(self.loop, 10)
             self.camera_loop.start()
+
+            t1 = MotionDetection()
 
         # Extensibility for other methods
         else:
