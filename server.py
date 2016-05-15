@@ -130,7 +130,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             dt = clock() - t
 
             draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
-            draw_str(fgmask, (20, 20), 'white count: %02d ms' % hist[255])
+            draw_str(fgmask, (20, 20), 'white count: %02d' % hist[255])
 
 
             #img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
@@ -169,6 +169,11 @@ else:
 #fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 #fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
 fgbg = cv2.createBackgroundSubtractorMOG2()
+# Create new threads
+thread1 = MotionDetection()
+
+# Start new Threads
+thread1.start()
 
 resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 if args.resolution in resolutions:
