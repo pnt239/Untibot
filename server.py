@@ -188,8 +188,8 @@ fgbg = cv2.createBackgroundSubtractorMOG2()
 thread1 = MotionDetection()
 
 # Start new Threads
-thread1.start()
-thread1.join()
+#thread1.start()
+#thread1.join()
 
 resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 if args.resolution in resolutions:
@@ -210,11 +210,6 @@ application.listen(args.port)
 
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
-#ioloop = tornado.ioloop.IOLoop.instance()
+ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
-#ioloop.start()
-try:
-    tornado.ioloop.IOLoop.instance().start()
-except KeyboardInterrupt:
-    tornado.ioloop.IOLoop.instance().stop()
-    thread1.stop()
+ioloop.start()
