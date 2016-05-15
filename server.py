@@ -212,4 +212,13 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
-ioloop.start()
+try:
+    ioloop.start()
+    pass
+except Exception, e:
+    ioloop.stop()
+    raise
+else:
+    pass
+finally:
+    pass
