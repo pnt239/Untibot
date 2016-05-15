@@ -48,6 +48,7 @@ nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 def on_shutdown():
     print('Shutting down')
     tornado.ioloop.IOLoop.instance().stop()
+    thread1.stop()
 
 class MotionDetection(threading.Thread):
     """
