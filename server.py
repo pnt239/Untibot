@@ -69,8 +69,9 @@ class MotionDetection(threading.Thread):
         """
         Thread run method. Check URLs one by one.
         """
-        while not self.stopped():
+        while (not self.stopped()):
             time.sleep(300)
+            pass
 
     def stop(self):
         self._stop.set()
