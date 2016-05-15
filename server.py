@@ -51,7 +51,7 @@ class VideoRecorder(threading.Thread):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
         self._fourcc = cv2.VideoWriter_fourcc(*'X264')
-        self._out = cv2.VideoWriter('output.mp4', self._fourcc, 20.0, (640,480))
+        self._out = cv2.VideoWriter('output.avi', self._fourcc, 20.0, (640,480))
         self._is_record = True
 
     def run(self):
