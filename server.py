@@ -96,7 +96,7 @@ class MotionDetection(threading.Thread):
             hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
             self.white_count = hist[255]
 
-            if self.white_count > 100:
+            #if self.white_count > 100:
                 #
 
             time.sleep(300)
