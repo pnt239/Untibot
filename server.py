@@ -218,7 +218,7 @@ else:
 #fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
 fgbg = cv2.createBackgroundSubtractorMOG2()
 # Create new threads
-thread1 = VideoRecorder()
+thread1 = MotionDetection()
 
 # Start new Threads
 #thread1.start()
