@@ -63,13 +63,20 @@ class MotionDetection(threading.Thread):
         @param output file to write urls output
         """
         threading.Thread.__init__(self)
+        self._stop = threading.Event()
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
-        while 1:
+        while !stopped():
             time.sleep(300)
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
 class IndexHandler(tornado.web.RequestHandler):
 
