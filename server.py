@@ -19,6 +19,7 @@ except ImportError:
 
 import tornado.web
 import tornado.websocket
+import signal
 from tornado.ioloop import PeriodicCallback
 from video import create_capture
 from common import clock, draw_str
@@ -43,6 +44,10 @@ def draw_rects(img, rects, color):
 
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
+
+def on_shutdown():
+    print('Shutting down')
+    tornado.ioloop.IOLoop.instance().stop()
 
 class MotionDetection(threading.Thread):
     """
@@ -194,4 +199,6 @@ application.listen(args.port)
 
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
-tornado.ioloop.IOLoop.instance().start()
+ioloop = tornado.ioloop.IOLoop.instance()
+signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
+ioloop.start()
