@@ -210,6 +210,11 @@ application.listen(args.port)
 
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
-ioloop = tornado.ioloop.IOLoop.instance()
-signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
-ioloop.start()
+#ioloop = tornado.ioloop.IOLoop.instance()
+#signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
+#ioloop.start()
+try:
+    tornado.ioloop.IOLoop.instance().start()
+except KeyboardInterrupt:
+    tornado.ioloop.IOLoop.instance().stop()
+    thread1.stop()
