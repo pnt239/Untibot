@@ -94,10 +94,10 @@ class MotionDetection(threading.Thread):
         Thread run method. Check URLs one by one.
         """
         while (not self.stopped()):
-            _, frame = camera.read()
-            fgmask = fgbg.apply(frame)
-            hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
-            self.white_count = hist[255]
+            #_, frame = camera.read()
+            #fgmask = fgbg.apply(frame)
+            #hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
+            #self.white_count = hist[255]
 
             #if self.white_count > 100:
                 #
