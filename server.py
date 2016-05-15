@@ -215,9 +215,9 @@ ioloop = tornado.ioloop.IOLoop.instance()
 try:
     ioloop.start()
     pass
-except Exception, e:
+except KeyboardInterrupt:
     ioloop.stop()
-    raise
+    pass
 else:
     pass
 finally:
