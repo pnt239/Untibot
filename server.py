@@ -99,8 +99,6 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             self.camera_loop = PeriodicCallback(self.loop, 10)
             self.camera_loop.start()
 
-            t1 = MotionDetection()
-
         # Extensibility for other methods
         else:
             print("Unsupported function: " + message)
@@ -117,6 +115,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             fgmask = fgbg.apply(frame)
+            hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
             #gray = cv2.equalizeHist(gray)
 
             #rects = detect(gray, cascade)
@@ -131,6 +130,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             dt = clock() - t
 
             draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
+            draw_str(fgmask, (20, 20), 'white count: %02d ms' % hist[255])
+
 
             #img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
             img = Image.fromarray(fgmask, mode='L')
