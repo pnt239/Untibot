@@ -45,11 +45,6 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-def on_shutdown():
-    print('Shutting down')
-    thread1.stop()
-    tornado.ioloop.IOLoop.instance().stop()
-
 class MotionDetection(threading.Thread):
     """
     Thread checking URLs.
