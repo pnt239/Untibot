@@ -189,6 +189,7 @@ thread1 = MotionDetection()
 
 # Start new Threads
 thread1.start()
+thread1.join()
 
 resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 if args.resolution in resolutions:
