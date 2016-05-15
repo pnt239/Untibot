@@ -58,6 +58,7 @@ class VideoRecorder(threading.Thread):
         while (not self.stopped()) and (camera.isOpened()) and (self._is_record):
             _, frame = camera.read()
             frame = cv2.flip(frame,0)
+            cv2.imwrite('duyen.jpg', frame)
             # write the flipped frame
             self._out.write(frame)
 
