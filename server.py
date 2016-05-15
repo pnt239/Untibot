@@ -73,6 +73,8 @@ class MotionDetection(threading.Thread):
             time.sleep(300)
             pass
 
+        print('End Thread')
+
     def stop(self):
         self._stop.set()
         print('Stop thread')
@@ -214,8 +216,11 @@ ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
 try:
     ioloop.start()
+    thread1.start()
+    thread1.join()
     pass
 except KeyboardInterrupt:
+    thread1.stop()
     ioloop.stop()
     pass
 else:
