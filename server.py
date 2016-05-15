@@ -55,6 +55,7 @@ class VideoRecorder(threading.Thread):
         self._is_record = True
 
     def run(self):
+        print('Start record')
         while (not self.stopped()) and (camera.isOpened()) and (self._is_record):
             _, frame = camera.read()
             frame = cv2.flip(frame,0)
@@ -62,6 +63,7 @@ class VideoRecorder(threading.Thread):
             # write the flipped frame
             self._out.write(frame)
 
+        print('Stop record')
         self._out.release()
 
     def stop(self):
