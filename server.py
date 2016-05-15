@@ -45,33 +45,10 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-class VideoRecorder(threading.Thread):
-    """docstring for VideoRecorder"""
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self._stop = threading.Event()
-        self._fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self._out = cv2.VideoWriter('output.avi', self._fourcc, 20.0, (640,480))
-        self._is_record = True
-
-    def run(self):
-        print('Start record')
-        while (not self.stopped()) and (camera.isOpened()) and (self._is_record):
-            _, frame = camera.read()
-            frame = cv2.flip(frame,0)
-            cv2.imwrite('duyen.jpg', frame)
-            # write the flipped frame
-            self._out.write(frame)
-
-        print('Stop record')
-        self._out.release()
-
-    def stop(self):
-        self._stop.set()
-        self._is_record = False
-
-    def stopped(self):
-        return self._stop.isSet()
+def on_shutdown():
+    print('Shutting down')
+    thread1.stop()
+    tornado.ioloop.IOLoop.instance().stop()
 
 class MotionDetection(threading.Thread):
     """
@@ -87,21 +64,12 @@ class MotionDetection(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._stop = threading.Event()
-        self.white_count = 0
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
         while (not self.stopped()):
-            #_, frame = camera.read()
-            #fgmask = fgbg.apply(frame)
-            #hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
-            #self.white_count = hist[255]
-
-            #if self.white_count > 100:
-                #
-
             time.sleep(300)
             pass
 
@@ -109,6 +77,7 @@ class MotionDetection(threading.Thread):
 
     def stop(self):
         self._stop.set()
+        print('Stop thread')
 
     def stopped(self):
         return self._stop.isSet()
