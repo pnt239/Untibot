@@ -45,10 +45,30 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-def on_shutdown():
-    print('Shutting down')
-    thread1.stop()
-    tornado.ioloop.IOLoop.instance().stop()
+class VideoRecorder(threading.Thread):
+    """docstring for VideoRecorder"""
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self._stop = threading.Event()
+        self._fourcc = cv2.VideoWriter_fourcc(*'X264')
+        self._out = cv2.VideoWriter('output.mp4', self._fourcc, 20.0, (640,480))
+        self._is_record = True
+
+    def run(self):
+        while (not self.stopped()) and (camera.isOpened()) and (self._is_record):
+            _, frame = camera.read()
+            frame = cv2.flip(frame,0)
+            # write the flipped frame
+            self._out.write(frame)
+
+        self._out.release()
+
+    def stop(self):
+        self._stop.set()
+        self._is_record = False
+
+    def stopped(self):
+        return self._stop.isSet()
 
 class MotionDetection(threading.Thread):
     """
@@ -64,12 +84,21 @@ class MotionDetection(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._stop = threading.Event()
+        self.white_count = 0
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
         while (not self.stopped()):
+            _, frame = camera.read()
+            fgmask = fgbg.apply(frame)
+            hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
+            self.white_count = hist[255]
+
+            if self.white_count > 100:
+                #
+
             time.sleep(300)
             pass
 
@@ -77,7 +106,6 @@ class MotionDetection(threading.Thread):
 
     def stop(self):
         self._stop.set()
-        print('Stop thread')
 
     def stopped(self):
         return self._stop.isSet()
@@ -187,7 +215,7 @@ else:
 #fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
 fgbg = cv2.createBackgroundSubtractorMOG2()
 # Create new threads
-thread1 = MotionDetection()
+thread1 = VideoRecorder()
 
 # Start new Threads
 #thread1.start()
