@@ -45,6 +45,47 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
+class RecordVideo(threading.Thread):
+    """
+    Thread checking URLs.
+    """
+
+    def __init__(self, camera):
+        """
+        Constructor.
+
+        @param urls list of urls to check
+        @param output file to write urls output
+        """
+        threading.Thread.__init__(self)
+        self._camera = camera
+        self._stop = threading.Event()
+        self._fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (640,480))
+
+    def run(self):
+        """
+        Thread run method. Check URLs one by one.
+        """
+        while (not self.stopped()):
+            ret, frame = self._camera.read()
+            if ret==True:
+                frame = cv2.flip(frame,0)
+
+                # write the flipped frame
+                self._out.write(frame)
+            pass
+
+        print('End Thread')
+        self._out.release()
+
+    def stop(self):
+        self._stop.set()
+        print('Stop thread')
+
+    def stopped(self):
+        return self._stop.isSet()
+
 class MotionDetection(threading.Thread):
     """
     Thread checking URLs.
