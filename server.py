@@ -66,8 +66,8 @@ class RecordVideo(threading.Thread):
         threading.Thread.__init__(self)
         self._camera = camera
         self._stop = threading.Event()
-        self._fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240))
+        self._fourcc = cv2.VideoWriter_fourcc(*'H264')
+        self._out = cv2.VideoWriter('output.mkv',self._fourcc, 20.0, (320,240))
 
     def run(self):
         """
@@ -98,7 +98,7 @@ class RecordVideo(threading.Thread):
                 print('video end')
                 break
 
-            time.sleep(10)
+            time.sleep(1)
 
         print('End Thread')
         #self._out.release()
