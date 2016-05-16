@@ -70,6 +70,7 @@ class RecordVideo(threading.Thread):
         ret, frame = self._camera.read()
         if ret==True:
             cv2.imwrite('test.jpg', frame)
+            print('Camera ok')
         else:
             print('Camera error')
 
