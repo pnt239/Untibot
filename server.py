@@ -45,6 +45,10 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
+def test(camera):
+    ret, frame = camera.read()
+    cv2.imwrite('test.jpg', frame)
+
 class RecordVideo(threading.Thread):
     """
     Thread checking URLs.
@@ -258,7 +262,9 @@ application.listen(args.port)
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
-thread1 = RecordVideo(camera)
+#thread1 = RecordVideo(camera)
+t = threading.Thread(target=test, args=(camera))
+t.start()
 
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
