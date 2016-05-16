@@ -66,8 +66,8 @@ class RecordVideo(threading.Thread):
         threading.Thread.__init__(self)
         self._camera = camera
         self._stop = threading.Event()
-        self._fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (640,480))
+        self._fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240))
 
     def run(self):
         """
@@ -85,6 +85,7 @@ class RecordVideo(threading.Thread):
         while (not self.stopped()):
             ret, frame = self._camera.read()
             if ret==True:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.flip(frame,0)
 
                 # write the flipped frame
