@@ -92,7 +92,7 @@ class RecordVideos(threading.Thread):
         """
         Thread run method. Check URLs one by one.
         """
-        """ret, frame = self._camera.read()
+        ret, frame = self._camera.read()
         if ret==True:
             cv2.imwrite('test.jpg', frame)
             print('Camera ok')
@@ -106,7 +106,7 @@ class RecordVideos(threading.Thread):
 
                 # write the flipped frame
                 self._out.write(frame)
-            pass"""
+            pass
 
         print('End Thread')
         #self._out.release()
@@ -284,8 +284,9 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
 #thread1 = RecordVideo(camera)
-mythread = RecordVideo(name = "RecordVideoThread")
+#mythread = RecordVideo(name = "RecordVideoThread")
 
+thread1 = myThread(1, "Thread-1", 1)
 #for x in range(4):                                     # Four times...
 #    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
 #    mythread.start()                                   # ...Start the thread
@@ -294,9 +295,9 @@ mythread = RecordVideo(name = "RecordVideoThread")
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
 try:
-    ioloop.start()
     thread1.start()
     thread1.join()
+    ioloop.start()
     pass
 except KeyboardInterrupt:
     thread1.stop()
