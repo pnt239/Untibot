@@ -284,7 +284,7 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
 #thread1 = RecordVideo(camera)
-mythread = RecordVideo(name = "Thread-{}".format(x + 1))
+mythread = RecordVideo(name = "RecordVideoThread")
 
 #for x in range(4):                                     # Four times...
 #    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
