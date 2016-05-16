@@ -121,7 +121,7 @@ class MotionDetection(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, video):
+    def __init__(self, video, fgbg):
         """
         Constructor.
 
@@ -131,19 +131,32 @@ class MotionDetection(threading.Thread):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
         self._video = video
+        self._fgbg = fgbg
+        self._is_recorded = False
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
         while (not self.stopped()):
-            time.sleep(0.001)
+            frame = self._video.getImage()
 
-        print('End Thread')
+            if frame != None:
+                fgmask = fgbg.apply(frame)
+                hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
+
+                if (hist[255] > 100) and (not self._is_recorded):
+                    self._is_recorded = True
+                    print('[Detector] start record video')
+                elif (hist[255] <= 100) and self._is_recorded :
+                    self._is_recorded = False
+                    print('[Detector] stop record video')
+
+        print('[Detector] end Thread')
 
     def stop(self):
         self._stop.set()
-        print('Stop thread')
+        print('[Detector] stop thread')
 
     def stopped(self):
         return self._stop.isSet()
@@ -278,17 +291,10 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
 thread1 = RecordVideo(camera)
-detector = MotionDetection(thread1)
-#mythread = RecordVideo(name = "RecordVideoThread")
-
-#thread1 = myThread(1, "Thread-1", 1)
-#for x in range(4):                                     # Four times...
-#    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
-#    mythread.start()                                   # ...Start the thread
-#    time.sleep(.9)
+detector = MotionDetection(thread1, fgbg)
 
 ioloop = tornado.ioloop.IOLoop.instance()
-#signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
+
 try:
     thread1.start()
     detector.start()
