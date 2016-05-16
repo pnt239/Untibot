@@ -65,7 +65,7 @@ class RecordVideo(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._camera = camera
-        self._stop = stop_event
+        self._stop = threading.Event()
         #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
 
@@ -279,8 +279,7 @@ application.listen(args.port)
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
-t1_stop= threading.Event()
-thread1 = RecordVideo(camera, t1_stop)
+thread1 = RecordVideo(camera)
 #mythread = RecordVideo(name = "RecordVideoThread")
 
 #thread1 = myThread(1, "Thread-1", 1)
@@ -293,7 +292,6 @@ ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
 try:
     thread1.start()
-    #thread1.join()
     ioloop.start()
     pass
 except KeyboardInterrupt:
