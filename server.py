@@ -69,6 +69,7 @@ class RecordVideo(threading.Thread):
         """
         ret, frame = self._camera.read()
         cv2.imwrite('test.jpg', frame)
+
         while (not self.stopped()):
             ret, frame = self._camera.read()
             if ret==True:
@@ -253,7 +254,7 @@ application.listen(args.port)
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
-thread1 = MotionDetection(camera)
+thread1 = RecordVideo(camera)
 
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
