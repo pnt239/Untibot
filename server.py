@@ -56,7 +56,7 @@ class RecordVideo(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, camera):
+    def __init__(self, camera, stop_event):
         """
         Constructor.
 
@@ -65,7 +65,7 @@ class RecordVideo(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._camera = camera
-        self._stop = threading.Event()
+        self._stop = stop_event
         #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
 
@@ -86,7 +86,7 @@ class RecordVideo(threading.Thread):
 
         begin = clock()
 
-        while (not self.stopped()):
+        while (not self._stop.is_set()):
             ret, frame = self._camera.read()
 
             if ret==True:
@@ -279,7 +279,8 @@ application.listen(args.port)
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
-thread1 = RecordVideo(camera)
+t1_stop= threading.Event()
+thread1 = RecordVideo(camera, t1_stop)
 #mythread = RecordVideo(name = "RecordVideoThread")
 
 #thread1 = myThread(1, "Thread-1", 1)
@@ -296,7 +297,7 @@ try:
     ioloop.start()
     pass
 except KeyboardInterrupt:
-    thread1.stop()
+    t1_stop.set()
     ioloop.stop()
     pass
 else:
