@@ -45,32 +45,13 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-class myThread (threading.Thread):
-    def __init__(self, threadID, name, counter):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
-        self.counter = counter
-    def run(self):
-        print "Starting " + self.name
-        print_time(self.name, self.counter, 5)
-        print "Exiting " + self.name
-
-def print_time(threadName, delay, counter):
-    while counter:
-        if exitFlag:
-            threadName.exit()
-        time.sleep(delay)
-        print "%s: %s" % (threadName, time.ctime(time.time()))
-        counter -= 1
-
-class RecordVideo(threading.Thread):
+class RecordVideo1(threading.Thread):
     def run(self):
         print("{} started!".format(self.getName()))              # "Thread-x started!"
         time.sleep(1)                                      # Pretend to work for a second
         print("{} finished!".format(self.getName()))             # "Thread-x finished!"
 
-class RecordVideos(threading.Thread):
+class RecordVideo(threading.Thread):
     """
     Thread checking URLs.
     """
@@ -283,10 +264,10 @@ application.listen(args.port)
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
-#thread1 = RecordVideo(camera)
+thread1 = RecordVideo(camera)
 #mythread = RecordVideo(name = "RecordVideoThread")
 
-thread1 = myThread(1, "Thread-1", 1)
+#thread1 = myThread(1, "Thread-1", 1)
 #for x in range(4):                                     # Four times...
 #    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
 #    mythread.start()                                   # ...Start the thread
