@@ -45,6 +45,25 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
+class myThread (threading.Thread):
+    def __init__(self, threadID, name, counter):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+    def run(self):
+        print "Starting " + self.name
+        print_time(self.name, self.counter, 5)
+        print "Exiting " + self.name
+
+def print_time(threadName, delay, counter):
+    while counter:
+        if exitFlag:
+            threadName.exit()
+        time.sleep(delay)
+        print "%s: %s" % (threadName, time.ctime(time.time()))
+        counter -= 1
+
 class RecordVideo(threading.Thread):
     def run(self):
         print("{} started!".format(self.getName()))              # "Thread-x started!"
@@ -265,10 +284,12 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
 #thread1 = RecordVideo(camera)
-for x in range(4):                                     # Four times...
-    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
-    mythread.start()                                   # ...Start the thread
-    time.sleep(.9)
+thread1 = myThread(1, "Thread-1", 1)
+
+#for x in range(4):                                     # Four times...
+#    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
+#    mythread.start()                                   # ...Start the thread
+#    time.sleep(.9)
 
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
