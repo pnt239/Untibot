@@ -67,7 +67,7 @@ class RecordVideo(threading.Thread):
         """
         Thread run method. Check URLs one by one.
         """
-        ret, frame = self._camera.read()
+        """ret, frame = self._camera.read()
         if ret==True:
             cv2.imwrite('test.jpg', frame)
             print('Camera ok')
@@ -81,10 +81,10 @@ class RecordVideo(threading.Thread):
 
                 # write the flipped frame
                 self._out.write(frame)
-            pass
+            pass"""
 
         print('End Thread')
-        self._out.release()
+        #self._out.release()
 
     def stop(self):
         self._stop.set()
