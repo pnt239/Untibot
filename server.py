@@ -112,7 +112,7 @@ class RecordVideo(threading.Thread):
 
     def getImage(self):
         clone = None
-        if self._frame != None:
+        if not (self._frame is None):
             self._frame_lock.acquire()
             clone = self._frame.copy()
             self._frame_lock.release()
@@ -143,7 +143,7 @@ class MotionDetection(threading.Thread):
         while (not self.stopped()):
             frame = self._video.getImage()
 
-            if frame != None:
+            if not (frame is None):
                 fgmask = fgbg.apply(frame)
                 hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
 
