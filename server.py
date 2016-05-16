@@ -80,19 +80,14 @@ class RecordVideo(threading.Thread):
         time.sleep(2.0)
 
         fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-        writer = None
-        (h, w) = (None, None)
+        ret, frame = self._camera.read()
+        (h, w) = frame.shape[:2]
+        writer = cv2.VideoWriter('output.avi', fourcc, 20.0, (w, h), True)
 
         begin = clock()
 
         while (not self.stopped()):
             ret, frame = self._camera.read()
-
-            if writer is None:
-                # store the image dimensions, initialzie the video writer,
-                # and construct the zeros array
-                (h, w) = frame.shape[:2]
-                writer = cv2.VideoWriter('output.avi', fourcc, 20.0, (w, h), True)
 
             if ret==True:
                 #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
