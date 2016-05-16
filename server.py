@@ -297,7 +297,7 @@ try:
     ioloop.start()
     pass
 except KeyboardInterrupt:
-    t1_stop.set()
+    thread1.stop()
     ioloop.stop()
     pass
 else:
