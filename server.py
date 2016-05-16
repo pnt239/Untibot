@@ -80,6 +80,8 @@ class RecordVideo(threading.Thread):
         else:
             print('Camera error')
 
+        begin = clock()
+
         while (not self.stopped()):
             ret, frame = self._camera.read()
             if ret==True:
@@ -87,6 +89,14 @@ class RecordVideo(threading.Thread):
 
                 # write the flipped frame
                 self._out.write(frame)
+
+            end = clock()
+
+            if end - begin > 10:
+                self._out.release()
+                print('video end')
+                break
+
             time.sleep(10)
 
         print('End Thread')
