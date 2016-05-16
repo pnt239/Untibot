@@ -153,9 +153,11 @@ class MotionDetection(threading.Thread):
 
                 white_count = hist[255]
 
-                if (white_count > 100) and (not self._is_recorded):
-                    self._is_recorded = True
-                    print('[Detector] start record video')
+                if (white_count > 100):
+                    if not self._is_recorded:
+                        self._is_recorded = True
+                        print('[Detector] start record video')
+                    pre_stop = False
                 elif (white_count <= 100) and self._is_recorded:
                     if not pre_stop:
                         pre_stop = True
