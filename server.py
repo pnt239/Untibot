@@ -233,14 +233,13 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
             t = clock()
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            #fgmask = fgbg.apply(frame)
+            #hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
+            gray = cv2.equalizeHist(gray)
 
-            fgmask = fgbg.apply(frame)
-            hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
-            #gray = cv2.equalizeHist(gray)
-
-            #rects = detect(gray, cascade)
+            rects = detect(gray, cascade)
             vis = img.copy()
-            #draw_rects(vis, rects, (0, 255, 0))
+            draw_rects(vis, rects, (0, 255, 0))
             #if not self.nested.empty():
             #    for x1, y1, x2, y2 in rects:
             #        roi = gray[y1:y2, x1:x2]
@@ -250,11 +249,11 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             dt = clock() - t
 
             draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
-            draw_str(fgmask, (20, 20), 'white count: %02d' % hist[255])
+            #draw_str(fgmask, (20, 20), 'white count: %02d' % hist[255])
 
 
-            #img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
-            img = Image.fromarray(fgmask, mode='L')
+            img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
+            #img = Image.fromarray(fgmask, mode='L')
             img.save(sio, "JPEG")
         else:
             camera.capture(sio, "jpeg", use_video_port=True)
