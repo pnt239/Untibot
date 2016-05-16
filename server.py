@@ -62,12 +62,14 @@ class RecordVideo(threading.Thread):
         self._camera = camera
         self._stop = threading.Event()
         self._frame_lock = threading.Lock()
+        self._writer_lock = threading.Lock()
         self._frame = None
 
         self._fourcc = None
         self._writer = None
         self._width = None
         self._height = None
+        self._back = np.zeros((320,240,3), dtype="uint8")
 
     def run(self):
         """
@@ -94,8 +96,10 @@ class RecordVideo(threading.Thread):
                 self._frame_lock.release()
 
                 # write the flipped frame
+                self._writer_lock.acquire()
                 if not (self._writer is None):
                     self._writer.write(frame)
+                self._writer_lock.release()
                 time.sleep(0.001)
 
         if not (self._writer is None):
@@ -115,14 +119,20 @@ class RecordVideo(threading.Thread):
             self._frame_lock.acquire()
             clone = self._frame.copy()
             self._frame_lock.release()
+        else:
+            clone = self._back.copy()
         return clone
 
     def startRecord(self):
+        self._writer_lock.acquire()
         self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
+        self._writer_lock.release()
 
     def stopRecord(self):
+        self._writer_lock.acquire()
         self._writer.release()
         self._writer = None
+        self._writer_lock.release()
 
 class MotionDetection(threading.Thread):
     """
@@ -228,8 +238,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         sio = io.StringIO()
 
         if args.use_usb:
-            frame = thread1.getImage()
-            img = frame#Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            img = thread1.getImage()
 
             t = clock()
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
