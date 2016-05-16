@@ -66,7 +66,7 @@ class RecordVideo(threading.Thread):
         threading.Thread.__init__(self)
         self._camera = camera
         self._stop = threading.Event()
-        self._lock = threading.Lock()
+        self._frame_lock = threading.Lock()
         self._frame = None
         #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
@@ -78,7 +78,7 @@ class RecordVideo(threading.Thread):
 
         # initialize the video stream and allow the camera
         # sensor to warmup
-        print("[INFO] warming up camera...")
+        print("[Recorder] warming up camera...")
         time.sleep(2.0)
 
         fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
@@ -90,9 +90,9 @@ class RecordVideo(threading.Thread):
             ret, frame = self._camera.read()
 
             if ret==True:
-                self._lock.acquire()
+                self._frame_lock.acquire()
                 self._frame = frame
-                self._lock.release()
+                self._frame_lock.release()
                 #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 #frame = cv2.flip(frame,0)
 
@@ -101,19 +101,19 @@ class RecordVideo(threading.Thread):
                 time.sleep(0.001)
 
         writer.release()
-        print('End Thread')
+        print('[Recorder] end thread')
 
     def stop(self):
         self._stop.set()
-        print('Stop thread')
+        print('[Recorder] stop thread')
 
     def stopped(self):
         return self._stop.isSet()
 
     def getImage(self):
-        self._lock.acquire()
+        self._frame_lock.acquire()
         clone = self._frame.copy()
-        self._lock.release()
+        self._frame_lock.release()
         return clone
 
 class MotionDetection(threading.Thread):
@@ -121,7 +121,7 @@ class MotionDetection(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, camera):
+    def __init__(self, video):
         """
         Constructor.
 
@@ -129,19 +129,15 @@ class MotionDetection(threading.Thread):
         @param output file to write urls output
         """
         threading.Thread.__init__(self)
-        self._camera = camera
         self._stop = threading.Event()
-
-        _, frame = camera.read()
-        cv2.imwrite('thanh.jpg', frame)
+        self._video = video
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
         while (not self.stopped()):
-            time.sleep(300)
-            pass
+            time.sleep(0.001)
 
         print('End Thread')
 
@@ -282,6 +278,7 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
 # Create new threads
 thread1 = RecordVideo(camera)
+detector = MotionDetection(thread1)
 #mythread = RecordVideo(name = "RecordVideoThread")
 
 #thread1 = myThread(1, "Thread-1", 1)
@@ -294,9 +291,11 @@ ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
 try:
     thread1.start()
+    detector.start()
     ioloop.start()
     pass
 except KeyboardInterrupt:
+    detector.stop()
     thread1.stop()
     ioloop.stop()
     pass
