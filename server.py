@@ -45,13 +45,13 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-class MyThread(threading.Thread):
+class RecordVideo(threading.Thread):
     def run(self):
         print("{} started!".format(self.getName()))              # "Thread-x started!"
         time.sleep(1)                                      # Pretend to work for a second
         print("{} finished!".format(self.getName()))             # "Thread-x finished!"
 
-class RecordVideo(threading.Thread):
+class RecordVideos(threading.Thread):
     """
     Thread checking URLs.
     """
@@ -266,7 +266,7 @@ webbrowser.open("http://localhost:%d/" % args.port, new=2)
 # Create new threads
 #thread1 = RecordVideo(camera)
 for x in range(4):                                     # Four times...
-    mythread = MyThread(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
+    mythread = RecordVideo(name = "Thread-{}".format(x + 1))  # ...Instantiate a thread and pass a unique ID to it
     mythread.start()                                   # ...Start the thread
     time.sleep(.9)
 
