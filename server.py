@@ -293,7 +293,7 @@ ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
 try:
     thread1.start()
-    thread1.join()
+    #thread1.join()
     ioloop.start()
     pass
 except KeyboardInterrupt:
