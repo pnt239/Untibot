@@ -66,39 +66,48 @@ class RecordVideo(threading.Thread):
         threading.Thread.__init__(self)
         self._camera = camera
         self._stop = threading.Event()
-        self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-        self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
+        #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+        #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
 
     def run(self):
         """
         Thread run method. Check URLs one by one.
         """
-        ret, frame = self._camera.read()
-        if ret==True:
-            cv2.imwrite('test.jpg', frame)
-            print('Camera ok')
-        else:
-            print('Camera error')
+
+        # initialize the video stream and allow the camera
+        # sensor to warmup
+        print("[INFO] warming up camera...")
+        time.sleep(2.0)
+
+        fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+        writer = None
+        (h, w) = (None, None)
 
         begin = clock()
 
         while (not self.stopped()):
             ret, frame = self._camera.read()
+
+            if writer is None:
+                # store the image dimensions, initialzie the video writer,
+                # and construct the zeros array
+                (h, w) = frame.shape[:2]
+                writer = cv2.VideoWriter('output.avi', fourcc, 20.0, (w, h), True)
+
             if ret==True:
                 #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 #frame = cv2.flip(frame,0)
 
                 # write the flipped frame
-                self._out.write(frame)
+                writer.write(frame)
+                time.sleep(0.001)
 
             end = clock()
 
             if end - begin > 10:
-                self._out.release()
+                writer.release()
                 print('video end')
                 break
-
-            time.sleep(1)
 
         print('End Thread')
         #self._out.release()
