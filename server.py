@@ -67,6 +67,8 @@ class RecordVideo(threading.Thread):
         """
         Thread run method. Check URLs one by one.
         """
+        ret, frame = self._camera.read()
+        cv2.imwrite('test.jpg', frame)
         while (not self.stopped()):
             ret, frame = self._camera.read()
             if ret==True:
