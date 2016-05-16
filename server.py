@@ -66,6 +66,8 @@ class RecordVideo(threading.Thread):
         threading.Thread.__init__(self)
         self._camera = camera
         self._stop = threading.Event()
+        self._lock = threading.Lock()
+        self._frame = None
         #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
 
@@ -84,12 +86,13 @@ class RecordVideo(threading.Thread):
         (h, w) = frame.shape[:2]
         writer = cv2.VideoWriter('output.avi', fourcc, 20.0, (w, h), True)
 
-        begin = clock()
-
         while (not self._stop.is_set()):
             ret, frame = self._camera.read()
 
             if ret==True:
+                self._lock.acquire()
+                self._frame = frame
+                self._lock.release()
                 #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 #frame = cv2.flip(frame,0)
 
@@ -97,15 +100,8 @@ class RecordVideo(threading.Thread):
                 writer.write(frame)
                 time.sleep(0.001)
 
-            end = clock()
-
-            if end - begin > 10:
-                writer.release()
-                print('video end')
-                break
-
+        writer.release()
         print('End Thread')
-        #self._out.release()
 
     def stop(self):
         self._stop.set()
@@ -113,6 +109,12 @@ class RecordVideo(threading.Thread):
 
     def stopped(self):
         return self._stop.isSet()
+
+    def getImage(self):
+        self._lock.acquire()
+        clone = self._frame.copy()
+        self._lock.release()
+        return clone
 
 class MotionDetection(threading.Thread):
     """
@@ -193,7 +195,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         sio = io.StringIO()
 
         if args.use_usb:
-            _, frame = camera.read()
+            frame = thread1.getImage()
             img = frame#Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
             t = clock()
