@@ -255,8 +255,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             gray = cv2.equalizeHist(gray)
 
             rects = detect(gray, cascade)
-            vis = img.copy()
-            draw_rects(vis, rects, (0, 255, 0))
+
+            draw_rects(img, rects, (0, 255, 0))
             #if not self.nested.empty():
             #    for x1, y1, x2, y2 in rects:
             #        roi = gray[y1:y2, x1:x2]
@@ -265,11 +265,11 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             #        draw_rects(vis_roi, subrects, (255, 0, 0))
             dt = clock() - t
 
-            draw_str(vis, (20, 20), 'time: %.1f ms' % (dt*1000))
+            draw_str(img, (20, 20), 'time: %.1f ms' % (dt*1000))
             #draw_str(fgmask, (20, 20), 'white count: %02d' % hist[255])
 
 
-            img = Image.fromarray(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB))
+            img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             #img = Image.fromarray(fgmask, mode='L')
             img.save(sio, "JPEG")
         else:
