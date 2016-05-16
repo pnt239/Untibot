@@ -111,6 +111,7 @@ class RecordVideo(threading.Thread):
         return self._stop.isSet()
 
     def getImage(self):
+        clone = None
         if self._frame != None:
             self._frame_lock.acquire()
             clone = self._frame.copy()
