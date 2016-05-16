@@ -56,7 +56,7 @@ class RecordVideo(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, camera, stop_event):
+    def __init__(self, camera):
         """
         Constructor.
 
