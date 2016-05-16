@@ -87,7 +87,7 @@ class RecordVideo(threading.Thread):
 
                 # write the flipped frame
                 self._out.write(frame)
-            pass
+            time.sleep(10)
 
         print('End Thread')
         #self._out.release()
