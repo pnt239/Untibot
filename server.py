@@ -70,6 +70,7 @@ class RecordVideo(threading.Thread):
         self._width = None
         self._height = None
         self._back = np.zeros((320,240,3), dtype="uint8")
+        self._is_ready = False
 
     def run(self):
         """
@@ -86,6 +87,7 @@ class RecordVideo(threading.Thread):
         (self._height, self._width) = frame.shape[:2]
 
         print("[Recorder] can start")
+        self._is_ready = True
 
         while (not self._stop.is_set()):
             ret, frame = self._camera.read()
@@ -124,15 +126,21 @@ class RecordVideo(threading.Thread):
         return clone
 
     def startRecord(self):
-        self._writer_lock.acquire()
-        self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
-        self._writer_lock.release()
+        if self._is_ready:
+            self._writer_lock.acquire()
+            self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
+            self._writer_lock.release()
+            return True
+        return False
 
     def stopRecord(self):
-        self._writer_lock.acquire()
-        self._writer.release()
-        self._writer = None
-        self._writer_lock.release()
+        if self._is_ready:
+            self._writer_lock.acquire()
+            self._writer.release()
+            self._writer = None
+            self._writer_lock.release()
+            return True
+        return False
 
 class MotionDetection(threading.Thread):
     """
@@ -171,8 +179,8 @@ class MotionDetection(threading.Thread):
 
                 if (white_count > 100):
                     if not self._is_recorded:
-                        self._is_recorded = True
-                        self._video.startRecord()
+                        if self._video.startRecord():
+                            self._is_recorded = True
                         print('[Detector] start record video')
                     pre_stop = False
                 elif (white_count <= 100) and self._is_recorded:
@@ -182,8 +190,8 @@ class MotionDetection(threading.Thread):
                     else:
                         end_t = clock()
                         if end_t - begin_t > 10:
-                            self._is_recorded = False
-                            self._video.stopRecord()
+                            if self._video.stopRecord():
+                                self._is_recorded = False
                             print('[Detector] stop record video')
 
         print('[Detector] end Thread')
