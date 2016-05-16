@@ -11,6 +11,7 @@ import threading
 import webbrowser
 import numpy as np
 import cv2
+from datetime import datetime
 
 try:
     import cStringIO as io
@@ -45,12 +46,6 @@ def draw_rects(img, rects, color):
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
 
-class RecordVideo1(threading.Thread):
-    def run(self):
-        print("{} started!".format(self.getName()))              # "Thread-x started!"
-        time.sleep(1)                                      # Pretend to work for a second
-        print("{} finished!".format(self.getName()))             # "Thread-x finished!"
-
 class RecordVideo(threading.Thread):
     """
     Thread checking URLs.
@@ -68,8 +63,11 @@ class RecordVideo(threading.Thread):
         self._stop = threading.Event()
         self._frame_lock = threading.Lock()
         self._frame = None
-        #self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-        #self._out = cv2.VideoWriter('output.avi',self._fourcc, 20.0, (320,240), True)
+
+        self._fourcc = None
+        self._writer = None
+        self._width = None
+        self._height = None
 
     def run(self):
         """
@@ -81,10 +79,11 @@ class RecordVideo(threading.Thread):
         print("[Recorder] warming up camera...")
         time.sleep(2.0)
 
-        fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+        self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
         ret, frame = self._camera.read()
-        (h, w) = frame.shape[:2]
-        writer = cv2.VideoWriter('output.avi', fourcc, 20.0, (w, h), True)
+        (self._height, self._width) = frame.shape[:2]
+
+        print("[Recorder] can start")
 
         while (not self._stop.is_set()):
             ret, frame = self._camera.read()
@@ -93,14 +92,13 @@ class RecordVideo(threading.Thread):
                 self._frame_lock.acquire()
                 self._frame = frame
                 self._frame_lock.release()
-                #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                #frame = cv2.flip(frame,0)
 
                 # write the flipped frame
-                writer.write(frame)
+                if not (self._writer is None):
+                    self._writer.write(frame)
                 time.sleep(0.001)
 
-        writer.release()
+        self._writer.release()
         print('[Recorder] end thread')
 
     def stop(self):
@@ -117,6 +115,13 @@ class RecordVideo(threading.Thread):
             clone = self._frame.copy()
             self._frame_lock.release()
         return clone
+
+    def startRecord():
+        self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
+
+    def stopRecord():
+        self._writer.release()
+        self._writer = None
 
 class MotionDetection(threading.Thread):
     """
@@ -156,6 +161,7 @@ class MotionDetection(threading.Thread):
                 if (white_count > 100):
                     if not self._is_recorded:
                         self._is_recorded = True
+                        self._video.startRecord()
                         print('[Detector] start record video')
                     pre_stop = False
                 elif (white_count <= 100) and self._is_recorded:
@@ -166,6 +172,7 @@ class MotionDetection(threading.Thread):
                         end_t = clock()
                         if end_t - begin_t > 10:
                             self._is_recorded = False
+                            self._video.stopRecord()
                             print('[Detector] stop record video')
 
         print('[Detector] end Thread')
