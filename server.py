@@ -98,7 +98,8 @@ class RecordVideo(threading.Thread):
                     self._writer.write(frame)
                 time.sleep(0.001)
 
-        self._writer.release()
+        if not (self._writer is None):
+            self._writer.release()
         print('[Recorder] end thread')
 
     def stop(self):
@@ -116,10 +117,10 @@ class RecordVideo(threading.Thread):
             self._frame_lock.release()
         return clone
 
-    def startRecord():
+    def startRecord(self):
         self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
 
-    def stopRecord():
+    def stopRecord(self):
         self._writer.release()
         self._writer = None
 
