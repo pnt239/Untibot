@@ -140,6 +140,10 @@ class MotionDetection(threading.Thread):
         """
         Thread run method. Check URLs one by one.
         """
+        pre_stop = False
+        begin_t = 0
+        end_t = 0
+
         while (not self.stopped()):
             frame = self._video.getImage()
 
@@ -147,12 +151,20 @@ class MotionDetection(threading.Thread):
                 fgmask = fgbg.apply(frame)
                 hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
 
-                if (hist[255] > 100) and (not self._is_recorded):
+                white_count = hist[255]
+
+                if (white_count > 100) and (not self._is_recorded):
                     self._is_recorded = True
                     print('[Detector] start record video')
-                elif (hist[255] <= 100) and self._is_recorded :
-                    self._is_recorded = False
-                    print('[Detector] stop record video')
+                elif (white_count <= 100) and self._is_recorded:
+                    if not pre_stop:
+                        pre_stop = True
+                        begin_t = clock()
+                    else:
+                        end_t = clock()
+                        if end_t - begin_t > 10:
+                            self._is_recorded = False
+                            print('[Detector] stop record video')
 
         print('[Detector] end Thread')
 
