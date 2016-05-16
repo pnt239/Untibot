@@ -50,7 +50,7 @@ class MotionDetection(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self):
+    def __init__(self, camera):
         """
         Constructor.
 
@@ -58,7 +58,11 @@ class MotionDetection(threading.Thread):
         @param output file to write urls output
         """
         threading.Thread.__init__(self)
+        self._camera = camera
         self._stop = threading.Event()
+
+        _, frame = camera.read()
+        cv2.imwrite('thanh.jpg', frame)
 
     def run(self):
         """
@@ -181,8 +185,6 @@ else:
 #fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 #fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
 fgbg = cv2.createBackgroundSubtractorMOG2()
-# Create new threads
-thread1 = MotionDetection()
 
 # Start new Threads
 #thread1.start()
@@ -206,6 +208,9 @@ application = tornado.web.Application(handlers, cookie_secret=PASSWORD)
 application.listen(args.port)
 
 webbrowser.open("http://localhost:%d/" % args.port, new=2)
+
+# Create new threads
+thread1 = MotionDetection(camera)
 
 ioloop = tornado.ioloop.IOLoop.instance()
 #signal.signal(signal.SIGINT, lambda sig, frame: ioloop.add_callback_from_signal(on_shutdown))
