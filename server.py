@@ -265,10 +265,10 @@ class DetectHandler(tornado.web.RequestHandler):
         json_obj = json_decode(self.request.body)
 
         if (json_obj['status'] == 'start'):
-            thread1.snap()
+            detector.start()
             self.write('Detector started!')
         else:
-            thread1.snap()
+            detector.stop()
             self.write('Detector stopped!')
 
 class LoginHandler(tornado.web.RequestHandler):
