@@ -14,6 +14,7 @@ import cv2
 #import picamera
 from PIL import Image
 from datetime import datetime
+import RPi.GPIO as GPIO
 
 try:
     import cStringIO as io
@@ -182,6 +183,7 @@ class MotionDetection(threading.Thread):
         self._fgbg = cv2.createBackgroundSubtractorMOG2()
         self._is_recorded = False
         self._init = True
+        GPIO.setup(18, GPIO.OUT)
 
     def run(self):
         """
@@ -207,6 +209,7 @@ class MotionDetection(threading.Thread):
                     if not self._is_recorded:
                         if self._video.startRecord():
                             self._is_recorded = True
+                            GPIO.output(18, True)
                         print('[Detector] start record video')
                     pre_stop = False
                 elif (white_count <= 100) and self._is_recorded:
@@ -218,6 +221,7 @@ class MotionDetection(threading.Thread):
                         if end_t - begin_t > 10:
                             if self._video.stopRecord():
                                 self._is_recorded = False
+                                GPIO.output(18, False)
                             print('[Detector] stop record video')
 
         print('[Detector] end Thread')
