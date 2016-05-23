@@ -182,11 +182,6 @@ client.connect(window.location.port);
         $(this).addClass('invisible');
         $('#detect-stop').removeClass('invisible');
 
-        $("#snap").attr("disabled", "disabled");
-        $("#detect").attr("disabled", "disabled");
-        $(this).addClass('invisible');
-        $('#record-stop').removeClass('invisible');
-
         $.ajax({
             url: '/detect',
             type: 'POST',
