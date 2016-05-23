@@ -209,10 +209,10 @@ class MotionDetection(threading.Thread):
 class IndexHandler(tornado.web.RequestHandler):
 
     def get(self):
-        if args.require_login and not self.get_secure_cookie(COOKIE_NAME):
-            self.redirect("/login")
-        else:
-            self.render("index.html")
+        #if args.require_login and not self.get_secure_cookie(COOKIE_NAME):
+        #    self.redirect("/login")
+        #else:
+        self.render("index.html")
 
 
 class LoginHandler(tornado.web.RequestHandler):
