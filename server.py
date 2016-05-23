@@ -37,6 +37,7 @@ COOKIE_NAME = "camp"
 uploadDir = os.path.join(ROOT, "upload/")
 thread1 = None
 detector = None
+args = None
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
@@ -340,6 +341,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 def main():
     global thread1
     global detector
+    global args
     # Commandline parser
     parser = argparse.ArgumentParser(description="Starts a webserver that "
                         "connects to a webcam.")
