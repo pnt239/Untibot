@@ -4,7 +4,8 @@
   "description": "A house supervisor",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node node_modules\\cloudcmd\\bin\\cloudcmd.js --root upload --port 8081 && python server.py --use-usb --resolution low"
   },
   "repository": {
     "type": "git",
