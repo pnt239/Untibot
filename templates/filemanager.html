@@ -17,7 +17,17 @@ iframe {
 {% block title %}File Manager{% end %}
 
 {% block body %}
-<iframe src="http://localhost:8081/" frameborder="0" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%"></iframe>
+<iframe id="fm" src="" frameborder="0" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%"></iframe>
+<script type="text/javascript">
+(function() {
+    'use strict';
+	var hostname = window.location.hostname;
+	var port = '8081';
+	var fmIframe = document.querySelector("#fm");
+
+	fmIframe.setAttribute("src", "http://" + hostname + ':' + port + "/");
+}());
+</script>
 {% end %}
 
 {% block bottom %}{% end %}
