@@ -1,0 +1,1 @@
+python server.py --use-usb --resolution low

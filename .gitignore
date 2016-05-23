@@ -1,2 +1,3 @@
 *.pyc
-*.avi
+/upload/*.avi
+/upload/*.jpg

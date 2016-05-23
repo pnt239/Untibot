@@ -24,6 +24,7 @@ import tornado.web
 import tornado.websocket
 import signal
 from tornado.ioloop import PeriodicCallback
+from tornado.escape import json_decode
 from video import create_capture
 from common import clock, draw_str
 
@@ -32,6 +33,10 @@ ROOT = os.path.normpath(os.path.dirname(__file__))
 with open(os.path.join(ROOT, "password.txt")) as in_file:
     PASSWORD = in_file.read().strip()
 COOKIE_NAME = "camp"
+
+uploadDir = os.path.join(ROOT, "upload/")
+thread1 = None
+detector = None
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
@@ -126,10 +131,23 @@ class RecordVideo(threading.Thread):
             clone = self._back.copy()
         return clone
 
+    def snap(self):
+        clone = None
+        if not (self._frame is None):
+            self._frame_lock.acquire()
+            clone = self._frame.copy()
+            self._frame_lock.release()
+        else:
+            clone = self._back.copy()
+
+        fileName =  time.strftime("%Y%m%d-%H%M%S") + '.jpg'
+        cv2.imwrite(uploadDir + fileName, clone)
+        return fileName
+
     def startRecord(self):
         if self._is_ready:
             self._writer_lock.acquire()
-            self._writer = cv2.VideoWriter(time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
+            self._writer = cv2.VideoWriter(uploadDir + time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
             self._writer_lock.release()
             return True
         return False
@@ -214,6 +232,35 @@ class IndexHandler(tornado.web.RequestHandler):
         #else:
         self.render("index.html")
 
+class SnapHandler(tornado.web.RequestHandler):
+    """docstring for SnapHandeler"""
+    def post(self):
+        fileName = thread1.snap()
+        self.write(fileName)
+
+class RecordHandler(tornado.web.RequestHandler):
+    """docstring for SnapHandeler"""
+    def post(self):
+        json_obj = json_decode(self.request.body)
+
+        if (json_obj['status'] == 'start'):
+            thread1.startRecord()
+            self.write('Recorder started!')
+        else:
+            thread1.stopRecord()
+            self.write('Recorder stopped!')
+
+class DetectHandler(tornado.web.RequestHandler):
+    """docstring for SnapHandeler"""
+    def post(self):
+        json_obj = json_decode(self.request.body)
+
+        if (json_obj['status'] == 'start'):
+            thread1.snap()
+            self.write('Detector started!')
+        else:
+            thread1.snap()
+            self.write('Detector stopped!')
 
 class LoginHandler(tornado.web.RequestHandler):
 
@@ -228,7 +275,6 @@ class LoginHandler(tornado.web.RequestHandler):
         else:
             time.sleep(1)
             self.redirect(u"/login?error")
-
 
 class WebSocket(tornado.websocket.WebSocketHandler):
 
@@ -284,6 +330,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             self.camera_loop.stop()
 
 def main():
+    global thread1
+    global detector
     # Commandline parser
     parser = argparse.ArgumentParser(description="Starts a webserver that "
                         "connects to a webcam.")
@@ -324,9 +372,13 @@ def main():
     # Web config
     handlers = [(r"/", IndexHandler),
                 (r"/login", LoginHandler),
-                (r"/websocket", WebSocket)]
+                (r"/websocket", WebSocket),
+                (r"/snap", SnapHandler),
+                (r"/record", RecordHandler),
+                (r"/detect", DetectHandler)]
 
     settings = {
+        "blog_title": u"Untibot App",
         "cookie_secret":PASSWORD,
         "template_path":os.path.join(os.path.dirname(__file__), "templates"),
         "static_path":os.path.join(os.path.dirname(__file__), "public")
@@ -345,7 +397,7 @@ def main():
 
     try:
         thread1.start()
-        detector.start()
+        #detector.start()
         ioloop.start()
         pass
     except KeyboardInterrupt:

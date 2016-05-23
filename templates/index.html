@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+.demo-card-wide.mdl-card {
+    width: 512px;
+}
+
+.demo-card-wide > .mdl-card__title {
+    color: #fff;
+    height: 176px;
+    background: url('../assets/demos/welcome_card.jpg') center / cover;
+}
+
+.demo-card-wide > .mdl-card__menu {
+    color: #fff;
+}
+
+.snippet-group {
+    display: table;
+}
+
+.snippet-demos {
+    display: table-row;
+}
+
+.snippet-demo {
+    padding: 0 10px 10px;
+    display: table-cell;
+}
+
+.invisible {
+    display: none;
+}
+</style>
+{% end %}
+
+{% block title %}Untibot{% end %} {% block body %}
+<div id="demo-snackbar-example" class="mdl-js-snackbar mdl-snackbar">
+  <div class="mdl-snackbar__text"></div>
+  <button class="mdl-snackbar__action invisible" type="button"></button>
+</div>
+
+<div class="demo-card-wide mdl-card mdl-shadow--2dp">
+    <!--<div class="mdl-card__title">
+    <h2 class="mdl-card__title-text">Welcome</h2>
+  </div>-->
+    <div class="mdl-card__supporting-text">
+        <img width="100%" id="video" src="{{ static_url("images/video_thumb.png ") }}"></img>
+    </div>
+    <div class="mdl-card__actions mdl-card--border">
+        <div class="snippet-group">
+            <div class="snippet-demos">
+                <div class="snippet-demo">
+                    <button id="record" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        Record
+                    </button>
+                    <button id="record-stop" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent invisible">
+                        Stop
+                    </button>
+                </div>
+                <div class="snippet-demo">
+                    <button id="snap" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        Snapshot
+                    </button>
+                </div>
+                <div class="snippet-demo">
+                    <button id="detect" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        Detect
+                    </button>
+                    <button id="detect-stop" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent invisible">
+                        Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mdl-card__menu">
+    </div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+<script>
+$(document).ready(function(){
+
+});
+</script>
+<script>
+(function() {
+    'use strict';
+    var snackbarContainer = document.querySelector('#demo-snackbar-example');
+    var snapButton = document.querySelector('#snap');
+    var recordButton = document.querySelector('#record');
+    var recordStopButton = document.querySelector('#record-stop');
+    var detectButton = document.querySelector('#detect');
+    var detectStopButton = document.querySelector('#detect-stop');
+
+    var handler = function(event) {
+        snapButton.style.backgroundColor = '';
+    };
+
+    var data = {
+        message: '',
+        timeout: 2000,
+        actionHandler: handler,
+        actionText: 'Undo'
+    };
+
+    snapButton.addEventListener('click', function() {
+        'use strict';
+
+        $.ajax({
+            url: '/snap',
+            type: 'POST',
+            data: 'a=b',
+            success: function (res) {
+                data.message = 'Taken ' + res;
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            },
+            error: function () {
+                data.message = "Error to load api";
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }
+        });
+    });
+
+    recordButton.addEventListener('click', function() {
+        'use strict';
+        $("#snap").attr("disabled", "disabled");
+        $("#detect").attr("disabled", "disabled");
+        $(this).addClass('invisible');
+        $('#record-stop').removeClass('invisible');
+
+        $.ajax({
+            url: '/record',
+            type: 'POST',
+            data: JSON.stringify({status: 'start'}),
+            success: function (res) {
+                data.message = res;
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            },
+            error: function () {
+                data.message = "Error to load api";
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }
+        });
+    });
+
+    recordStopButton.addEventListener('click', function() {
+        'use strict';
+        $("#snap").removeAttr("disabled");
+        $("#detect").removeAttr("disabled");
+        $(this).addClass('invisible');
+        $('#record').removeClass('invisible');
+
+        $.ajax({
+            url: '/record',
+            type: 'POST',
+            data: JSON.stringify({status: 'stop'}),
+            success: function (res) {
+                data.message = res;
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            },
+            error: function () {
+                data.message = "Error to load api";
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }
+        });
+    });
+
+    detectButton.addEventListener('click', function() {
+        'use strict';
+        $("#record").attr("disabled", "disabled");
+        $("#snap").attr("disabled", "disabled");
+        $(this).addClass('invisible');
+        $('#detect-stop').removeClass('invisible');
+
+        $("#snap").attr("disabled", "disabled");
+        $("#detect").attr("disabled", "disabled");
+        $(this).addClass('invisible');
+        $('#record-stop').removeClass('invisible');
+
+        $.ajax({
+            url: '/detect',
+            type: 'POST',
+            data: JSON.stringify({status: 'start'}),
+            success: function (res) {
+                data.message = res;
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            },
+            error: function () {
+                data.message = "Error to load api";
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }
+        });
+    });
+
+    detectStopButton.addEventListener('click', function() {
+        'use strict';
+        $("#snap").removeAttr("disabled");
+        $("#record").removeAttr("disabled");
+        $(this).addClass('invisible');
+        $('#detect').removeClass('invisible');
+
+        $.ajax({
+            url: '/detect',
+            type: 'POST',
+            data: JSON.stringify({status: 'stop'}),
+            success: function (res) {
+                data.message = res;
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            },
+            error: function () {
+                data.message = "Error to load api";
+                snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }
+        });
+    });
+}());
+</script>
+{% end %}
