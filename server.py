@@ -232,6 +232,14 @@ class IndexHandler(tornado.web.RequestHandler):
         #else:
         self.render("index.html")
 
+class FileManagerHandler(tornado.web.RequestHandler):
+
+    def get(self):
+        #if args.require_login and not self.get_secure_cookie(COOKIE_NAME):
+        #    self.redirect("/login")
+        #else:
+        self.render("filemanager.html")
+
 class SnapHandler(tornado.web.RequestHandler):
     """docstring for SnapHandeler"""
     def post(self):
@@ -375,7 +383,8 @@ def main():
                 (r"/websocket", WebSocket),
                 (r"/snap", SnapHandler),
                 (r"/record", RecordHandler),
-                (r"/detect", DetectHandler)]
+                (r"/detect", DetectHandler),
+                (r"/fm", FileManagerHandler)]
 
     settings = {
         "blog_title": u"Untibot App",
