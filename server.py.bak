@@ -11,8 +11,6 @@ import threading
 import webbrowser
 import numpy as np
 import cv2
-#import picamera
-from PIL import Image
 from datetime import datetime
 
 try:
@@ -53,7 +51,7 @@ class RecordVideo(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, camera, camera_width, camera_height):
+    def __init__(self, camera):
         """
         Constructor.
 
@@ -69,8 +67,8 @@ class RecordVideo(threading.Thread):
 
         self._fourcc = None
         self._writer = None
-        self._width = camera_width
-        self._height = camera_height
+        self._width = None
+        self._height = None
         self._back = np.zeros((320,240,3), dtype="uint8")
         self._is_ready = False
 
@@ -85,8 +83,9 @@ class RecordVideo(threading.Thread):
         time.sleep(2.0)
 
         self._fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-        #ret, frame = self._camera.read()
-        #(self._height, self._width) = frame.shape[:2]
+        ret, frame = self._camera.read()
+        (self._height, self._width) = frame.shape[:2]
+
         print("[Recorder] can start")
         self._is_ready = True
 
@@ -148,7 +147,7 @@ class MotionDetection(threading.Thread):
     Thread checking URLs.
     """
 
-    def __init__(self, video):
+    def __init__(self, video, fgbg):
         """
         Constructor.
 
@@ -158,9 +157,7 @@ class MotionDetection(threading.Thread):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
         self._video = video
-        #self._fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
-        #self._fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
-        self._fgbg = cv2.createBackgroundSubtractorMOG2()
+        self._fgbg = fgbg
         self._is_recorded = False
 
     def run(self):
@@ -175,7 +172,7 @@ class MotionDetection(threading.Thread):
             frame = self._video.getImage()
 
             if not (frame is None):
-                fgmask = self._fgbg.apply(frame)
+                fgmask = fgbg.apply(frame)
                 hist = cv2.calcHist([fgmask],[0],None,[256],[0,256])
 
                 white_count = hist[255]
@@ -212,7 +209,7 @@ class IndexHandler(tornado.web.RequestHandler):
         if args.require_login and not self.get_secure_cookie(COOKIE_NAME):
             self.redirect("/login")
         else:
-            self.render("index.html")
+            self.render("index.html", port=args.port)
 
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -283,80 +280,72 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         except tornado.websocket.WebSocketClosedError:
             self.camera_loop.stop()
 
-def main():
-    # Commandline parser
-    parser = argparse.ArgumentParser(description="Starts a webserver that "
-                        "connects to a webcam.")
-    parser.add_argument("--port", type=int, default=8000, help="The "
-                        "port on which to serve the website.")
-    parser.add_argument("--resolution", type=str, default="low", help="The "
-                        "video resolution. Can be high, medium, or low.")
-    parser.add_argument("--require-login", action="store_true", help="Require "
-                        "a password to log in to webserver.")
-    parser.add_argument("--use-usb", action="store_true", help="Use a USB "
-                        "webcam instead of the standard Pi camera.")
-    args = parser.parse_args()
 
-    camera = None
-    camera_width = None
-    camera_height = None
+parser = argparse.ArgumentParser(description="Starts a webserver that "
+                                 "connects to a webcam.")
+parser.add_argument("--port", type=int, default=8000, help="The "
+                    "port on which to serve the website.")
+parser.add_argument("--resolution", type=str, default="low", help="The "
+                    "video resolution. Can be high, medium, or low.")
+parser.add_argument("--require-login", action="store_true", help="Require "
+                    "a password to log in to webserver.")
+parser.add_argument("--use-usb", action="store_true", help="Use a USB "
+                    "webcam instead of the standard Pi camera.")
+args = parser.parse_args()
 
-    # Select camera
+if args.use_usb:
+    import cv2
+    from PIL import Image
+    camera = cv2.VideoCapture(0)
+else:
+    import picamera
+    camera = picamera.PiCamera()
+    camera.start_preview()
+
+#fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
+#fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
+fgbg = cv2.createBackgroundSubtractorMOG2()
+
+# Start new Threads
+#thread1.start()
+#thread1.join()
+
+resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
+if args.resolution in resolutions:
     if args.use_usb:
-        camera = cv2.VideoCapture(0)
+        w, h = resolutions[args.resolution]
+        camera.set(3, w)
+        camera.set(4, h)
     else:
-        camera = picamera.PiCamera()
-        camera.start_preview()
+        camera.resolution = resolutions[args.resolution]
+else:
+    raise Exception("%s not in resolution options." % args.resolution)
 
-    resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
+handlers = [(r"/", IndexHandler), (r"/login", LoginHandler),
+            (r"/websocket", WebSocket),
+            (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': ROOT})]
+application = tornado.web.Application(handlers, cookie_secret=PASSWORD)
+application.listen(args.port)
 
-    if args.resolution in resolutions:
-        camera_width, camera_height = resolutions[args.resolution]
+webbrowser.open("http://localhost:%d/" % args.port, new=2)
 
-        if args.use_usb:
-            camera.set(3, camera_width)
-            camera.set(4, camera_height)
-        else:
-            camera.resolution = resolutions[args.resolution]
-    else:
-        raise Exception("%s not in resolution options." % args.resolution)
+# Create new threads
+thread1 = RecordVideo(camera)
+detector = MotionDetection(thread1, fgbg)
 
-    # Web config
-    handlers = [(r"/", IndexHandler),
-                (r"/login", LoginHandler),
-                (r"/websocket", WebSocket)]
+ioloop = tornado.ioloop.IOLoop.instance()
 
-    settings = {
-        "cookie_secret":PASSWORD,
-        "template_path":os.path.join(os.path.dirname(__file__), "templates"),
-        "static_path":os.path.join(os.path.dirname(__file__), "public")
-    }
-
-    application = tornado.web.Application(handlers, **settings)
-    application.listen(args.port)
-
-    #webbrowser.open("http://localhost:%d/" % args.port, new=2)
-
-    # Create Recorder and Detector threads
-    thread1 = RecordVideo(camera, camera_width, camera_height)
-    detector = MotionDetection(thread1)
-
-    ioloop = tornado.ioloop.IOLoop.instance()
-
-    try:
-        thread1.start()
-        detector.start()
-        ioloop.start()
-        pass
-    except KeyboardInterrupt:
-        detector.stop()
-        thread1.stop()
-        ioloop.stop()
-        pass
-    else:
-        pass
-    finally:
-        pass
-
-if __name__ == "__main__":
-    main()
+try:
+    thread1.start()
+    detector.start()
+    ioloop.start()
+    pass
+except KeyboardInterrupt:
+    detector.stop()
+    thread1.stop()
+    ioloop.stop()
+    pass
+else:
+    pass
+finally:
+    pass
