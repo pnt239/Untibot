@@ -181,6 +181,7 @@ class MotionDetection(threading.Thread):
         #self._fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
         self._fgbg = cv2.createBackgroundSubtractorMOG2()
         self._is_recorded = False
+        self._init = True
 
     def run(self):
         """
@@ -189,6 +190,9 @@ class MotionDetection(threading.Thread):
         pre_stop = False
         begin_t = 0
         end_t = 0
+
+        frame = self._video.getImage()
+        self._fgbg.apply(frame)
 
         while (not self.stopped()):
             frame = self._video.getImage()
@@ -199,7 +203,7 @@ class MotionDetection(threading.Thread):
 
                 white_count = hist[255]
 
-                if (white_count > 100):
+                if (white_count > 500):
                     if not self._is_recorded:
                         if self._video.startRecord():
                             self._is_recorded = True
