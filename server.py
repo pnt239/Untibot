@@ -40,6 +40,9 @@ thread1 = None
 detector = None
 args = None
 
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(18, GPIO.OUT)
+
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
                                      flags=cv2.CASCADE_SCALE_IMAGE)
@@ -183,7 +186,6 @@ class MotionDetection(threading.Thread):
         self._fgbg = cv2.createBackgroundSubtractorMOG2()
         self._is_recorded = False
         self._init = True
-        GPIO.setup(18, GPIO.OUT)
 
     def run(self):
         """
