@@ -202,8 +202,7 @@ class MotionDetection(threading.Thread):
         begin_t = 0
         end_t = 0
 
-        frame = self._video.getImage()
-        self._fgbg.apply(frame)
+        self.removeNoise()
 
         while (not self.stopped()):
 
@@ -251,6 +250,7 @@ class MotionDetection(threading.Thread):
 
     def resume(self):
         self._pause = False
+        self.removeNoise()
         print('[Detector] resume thread')
 
     def stop(self):
@@ -259,6 +259,10 @@ class MotionDetection(threading.Thread):
 
     def stopped(self):
         return self._stop.isSet()
+
+    def removeNoise(self):
+        frame = self._video.getImage()
+        self._fgbg.apply(frame)
 
 class IndexHandler(tornado.web.RequestHandler):
 
