@@ -112,6 +112,7 @@ html, body {
 
 .demo-content {
   max-width: 1080px;
+  padding: 8px;
 }
 
 .demo-charts {
