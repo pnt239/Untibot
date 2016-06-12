@@ -353,7 +353,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
             rects = detect(gray, cascade)
 
-            if not rects.any():
+            if rects = None:
                 print "List is empty"
 
             draw_rects(img, rects, (0, 255, 0))
