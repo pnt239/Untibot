@@ -223,7 +223,9 @@ class MotionDetection(threading.Thread):
                     if not self._video.isRecorded():
                         if self._video.startRecord():
                             GPIO.output(18, True)
-                        print('[Detector] start record video')
+                            print('[Detector] start record video')
+                        else
+                            print('[Detector] start record video fail!')
                     pre_stop = False
                 elif (white_count <= 100) and self._video.isRecorded():
                     if not pre_stop:
@@ -234,7 +236,9 @@ class MotionDetection(threading.Thread):
                         if end_t - begin_t > 10:
                             if self._video.stopRecord():
                                 GPIO.output(18, False)
-                            print('[Detector] stop record video')
+                                print('[Detector] stop record video')
+                            else
+                                print('[Detector] stop record video fail!')
 
         print('[Detector] end Thread')
 
