@@ -37,14 +37,6 @@
         margin-bottom: 40px;
         z-index: 900;
     }
-
-    .mdl-grid {
-        margin: 0 0;
-    }
-
-    .mdl-layout__content {
-        margin-left: 0px;
-    }
     </style>
     {% block head %}{% end %}
 </head>
@@ -100,7 +92,7 @@
             </nav>
         </div>
         -->
-        <main class="mdl-layout__content mdl-color--grey-100">
+        <main class="mdl-color--grey-100"><!-- mdl-layout__content -->
             <div class="mdl-grid demo-content">
                 {% block body %}{% end %}
             </div>

@@ -40,7 +40,6 @@ thread1 = None
 detector = None
 args = None
 
-GPIO.cleanup()
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(18, GPIO.OUT)
 GPIO.output(18, GPIO.LOW)
