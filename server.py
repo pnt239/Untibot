@@ -40,8 +40,10 @@ thread1 = None
 detector = None
 args = None
 
+GPIO.cleanup()
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(18, GPIO.OUT)
+GPIO.output(18, GPIO.LOW)
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
@@ -425,6 +427,7 @@ def main():
         detector.stop()
         thread1.stop()
         ioloop.stop()
+        GPIO.cleanup()
         pass
     else:
         pass
