@@ -220,7 +220,7 @@ class MotionDetection(threading.Thread):
                 white_count = hist[255]
 
                 if (white_count > 500):
-                    if not self._video.isRecorded():
+                    if not self._video.isRecorded() and not self._pause:
                         if self._video.startRecord():
                             GPIO.output(18, True)
                             print('[Detector] start record video')
@@ -239,7 +239,8 @@ class MotionDetection(threading.Thread):
                                 print('[Detector] stop record video')
                             else:
                                 print('[Detector] stop record video fail!')
-
+        if self._video.isRecorded():
+            self._video.stopRecord():
         print('[Detector] end Thread')
 
     def pause(self):
