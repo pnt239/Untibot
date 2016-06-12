@@ -240,7 +240,7 @@ class MotionDetection(threading.Thread):
                             else:
                                 print('[Detector] stop record video fail!')
         if self._video.isRecorded():
-            self._video.stopRecord():
+            self._video.stopRecord()
         print('[Detector] end Thread')
 
     def pause(self):
