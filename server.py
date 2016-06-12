@@ -84,6 +84,7 @@ class RecordVideo(threading.Thread):
         self._height = camera_height
         self._back = np.zeros((320,240,3), dtype="uint8")
         self._is_ready = False
+        self._is_recorded = False
 
     def run(self):
         """
@@ -137,6 +138,9 @@ class RecordVideo(threading.Thread):
             clone = self._back.copy()
         return clone
 
+    def isRecorded(self):
+        return self._is_recorded
+
     def snap(self):
         clone = None
         if not (self._frame is None):
@@ -151,19 +155,21 @@ class RecordVideo(threading.Thread):
         return fileName
 
     def startRecord(self):
-        if self._is_ready:
+        if self._is_ready and not self._is_recorded:
             self._writer_lock.acquire()
             self._writer = cv2.VideoWriter(uploadDir + time.strftime("%Y%m%d-%H%M%S") + ".avi", self._fourcc, 20.0, (self._width, self._height), True)
             self._writer_lock.release()
+            self._is_recorded = True
             return True
         return False
 
     def stopRecord(self):
-        if self._is_ready:
+        if self._is_ready and self._is_recorded:
             self._writer_lock.acquire()
             self._writer.release()
             self._writer = None
             self._writer_lock.release()
+            self._is_recorded = False
             return True
         return False
 
@@ -181,11 +187,11 @@ class MotionDetection(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._stop = threading.Event()
+        self._pause = True
         self._video = video
         #self._fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
         #self._fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
         self._fgbg = cv2.createBackgroundSubtractorMOG2()
-        self._is_recorded = False
         self._init = True
 
     def run(self):
@@ -200,6 +206,11 @@ class MotionDetection(threading.Thread):
         self._fgbg.apply(frame)
 
         while (not self.stopped()):
+
+            if self._pause:
+                time.sleep(0.001)
+                continue
+
             frame = self._video.getImage()
 
             if not (frame is None):
@@ -209,13 +220,12 @@ class MotionDetection(threading.Thread):
                 white_count = hist[255]
 
                 if (white_count > 500):
-                    if not self._is_recorded:
+                    if not self._video.isRecorded():
                         if self._video.startRecord():
-                            self._is_recorded = True
                             GPIO.output(18, True)
                         print('[Detector] start record video')
                     pre_stop = False
-                elif (white_count <= 100) and self._is_recorded:
+                elif (white_count <= 100) and self._video.isRecorded():
                     if not pre_stop:
                         pre_stop = True
                         begin_t = clock()
@@ -223,11 +233,20 @@ class MotionDetection(threading.Thread):
                         end_t = clock()
                         if end_t - begin_t > 10:
                             if self._video.stopRecord():
-                                self._is_recorded = False
                                 GPIO.output(18, False)
                             print('[Detector] stop record video')
 
         print('[Detector] end Thread')
+
+    def pause(self):
+        self._pause = True
+        self._video.stopRecord()
+        GPIO.output(18, False)
+        print('[Detector] pause thread')
+
+    def resume(self):
+        self._pause = False
+        print('[Detector] resume thread')
 
     def stop(self):
         self._stop.set()
@@ -276,10 +295,10 @@ class DetectHandler(tornado.web.RequestHandler):
         json_obj = json_decode(self.request.body)
 
         if (json_obj['status'] == 'start'):
-            detector.start()
+            detector.resume()
             self.write('Detector started!')
         else:
-            detector.stop()
+            detector.pause()
             self.write('Detector stopped!')
 
 class LoginHandler(tornado.web.RequestHandler):
@@ -419,7 +438,7 @@ def main():
 
     try:
         thread1.start()
-        #detector.start()
+        detector.start()
         ioloop.start()
         pass
     except KeyboardInterrupt:
