@@ -41,7 +41,7 @@ thread1 = None
 detector = None
 args = None
 
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
 GPIO.output(18, GPIO.HIGH)
 
