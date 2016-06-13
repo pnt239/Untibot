@@ -196,6 +196,7 @@ class MotionDetection(threading.Thread):
         #self._fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
         self._fgbg = cv2.createBackgroundSubtractorMOG2()
         self._init = True
+        self._hasMotion = False
 
     def run(self):
         """
@@ -224,7 +225,7 @@ class MotionDetection(threading.Thread):
                 if (white_count > 500):
                     if not self._video.isRecorded() and not self._pause:
                         if self._video.startRecord():
-                            GPIO.output(18, GPIO.HIGH)
+                            self._hasMotion = True
                             print('[Detector] start record video')
                         else:
                             print('[Detector] start record video fail!')
@@ -237,19 +238,19 @@ class MotionDetection(threading.Thread):
                         end_t = clock()
                         if end_t - begin_t > 10:
                             if self._video.stopRecord():
-                                GPIO.output(18, GPIO.LOW)
+                                self._hasMotion = False
                                 print('[Detector] stop record video')
                             else:
                                 print('[Detector] stop record video fail!')
         if self._video.isRecorded():
-            GPIO.output(18, GPIO.LOW)
+            self._hasMotion = False
             self._video.stopRecord()
         print('[Detector] end Thread')
 
     def pause(self):
         self._pause = True
         self._video.stopRecord()
-        GPIO.output(18, GPIO.LOW)
+        self._hasMotion = False
         print('[Detector] pause thread')
 
     def resume(self):
@@ -267,6 +268,9 @@ class MotionDetection(threading.Thread):
     def removeNoise(self):
         frame = self._video.getImage()
         self._fgbg.apply(frame)
+        
+    def hasMotion(self):
+        return self._hasMotion
 
 class IndexHandler(tornado.web.RequestHandler):
 
@@ -364,6 +368,13 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                     padding=(8, 8), scale=1.05)
                 rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
                 rects = non_max_suppression(rects, probs=None, overlapThresh=0.65)
+                
+            if detector.hasMotion():
+                if len(rects) == 0:
+                    GPIO.output(18, GPIO.LOW)
+                else:
+                    GPIO.output(18, GPIO.HIGH)
+                    
 
             draw_rects(img, rects, (0, 255, 0))
             #if not self.nested.empty():
