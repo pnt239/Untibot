@@ -11,7 +11,7 @@ import threading
 import webbrowser
 import numpy as np
 import cv2
-#import picamera
+import picamera
 from PIL import Image
 from datetime import datetime
 import RPi.GPIO as GPIO
