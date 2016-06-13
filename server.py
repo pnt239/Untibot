@@ -359,7 +359,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             if len(rects) == 0:
                 #print "List is empty"
                 # detect people in the image
-                (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
+                (rects, weights) = hog.detectMultiScale(gray, winStride=(4, 4),
                     padding=(8, 8), scale=1.05)
                 rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
                 rects = non_max_suppression(rects, probs=None, overlapThresh=0.65)
