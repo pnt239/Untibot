@@ -41,6 +41,7 @@ uploadDir = os.path.join(ROOT, "upload/")
 thread1 = None
 detector = None
 args = None
+resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
@@ -107,15 +108,18 @@ class RecordVideo(threading.Thread):
         self._is_ready = True
         ret = False
         frame = None
-        rawCapture = PiRGBArray(self._camera)
+        stream = io.BytesIO()
         
         while (not self._stop.is_set()):
             if args.use_usb:
                 ret, frame = self._camera.read()
             else:
                 ret = True
-                self._camera.capture(rawCapture, "jpeg", use_video_port=True)
-                frame = rawCapture.array
+                self._camera.capture(stream, format='jpeg', use_video_port=True)
+                # Construct a numpy array from the stream
+                data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+                # "Decode" the image from the array, preserving colour
+                frame = cv2.imdecode(data, 1)
 
             if ret==True:
                 self._frame_lock.acquire()
@@ -435,7 +439,7 @@ def main():
         camera = picamera.PiCamera()
         camera.start_preview()
 
-    resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240), "360" : (480, 360)}
+    
 
     if args.resolution in resolutions:
         camera_width, camera_height = resolutions[args.resolution]
