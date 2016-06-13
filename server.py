@@ -17,6 +17,7 @@ from PIL import Image
 from datetime import datetime
 import RPi.GPIO as GPIO
 from imutils.object_detection import non_max_suppression
+import io as ioEx
 
 try:
     import cStringIO as io
@@ -108,7 +109,7 @@ class RecordVideo(threading.Thread):
         self._is_ready = True
         ret = False
         frame = None
-        stream = io.BytesIO()
+        stream = ioEx.BytesIO()
         
         while (not self._stop.is_set()):
             if args.use_usb:
