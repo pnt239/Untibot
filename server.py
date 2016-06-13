@@ -15,6 +15,7 @@ import cv2
 from PIL import Image
 from datetime import datetime
 import RPi.GPIO as GPIO
+from imutils.object_detection import non_max_suppression
 
 try:
     import cStringIO as io
@@ -58,6 +59,8 @@ def draw_rects(img, rects, color):
 
 cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 nested = cv2.CascadeClassifier("haarcascade_eye.xml")
+hog = cv2.HOGDescriptor()
+hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
 class RecordVideo(threading.Thread):
     """
@@ -354,7 +357,12 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             rects = detect(gray, cascade)
 
             if len(rects) == 0:
-                print "List is empty"
+                #print "List is empty"
+                # detect people in the image
+                (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
+                    padding=(8, 8), scale=1.05)
+                rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+                rects = non_max_suppression(rects, probs=None, overlapThresh=0.65)
 
             draw_rects(img, rects, (0, 255, 0))
             #if not self.nested.empty():
