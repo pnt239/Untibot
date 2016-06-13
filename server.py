@@ -43,7 +43,7 @@ args = None
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)
-GPIO.output(18, GPIO.HIGH)
+GPIO.output(18, GPIO.LOW)
 
 def detect(img, cascade):
     rects = cascade.detectMultiScale(img, scaleFactor=1.3, minNeighbors=4, minSize=(30, 30),
@@ -224,7 +224,7 @@ class MotionDetection(threading.Thread):
                 if (white_count > 500):
                     if not self._video.isRecorded() and not self._pause:
                         if self._video.startRecord():
-                            GPIO.output(18, True)
+                            GPIO.output(18, GPIO.HIGH)
                             print('[Detector] start record video')
                         else:
                             print('[Detector] start record video fail!')
@@ -237,18 +237,19 @@ class MotionDetection(threading.Thread):
                         end_t = clock()
                         if end_t - begin_t > 10:
                             if self._video.stopRecord():
-                                GPIO.output(18, False)
+                                GPIO.output(18, GPIO.LOW)
                                 print('[Detector] stop record video')
                             else:
                                 print('[Detector] stop record video fail!')
         if self._video.isRecorded():
+            GPIO.output(18, GPIO.LOW)
             self._video.stopRecord()
         print('[Detector] end Thread')
 
     def pause(self):
         self._pause = True
         self._video.stopRecord()
-        GPIO.output(18, False)
+        GPIO.output(18, GPIO.LOW)
         print('[Detector] pause thread')
 
     def resume(self):
