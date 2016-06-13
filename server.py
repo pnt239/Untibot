@@ -12,6 +12,7 @@ import webbrowser
 import numpy as np
 import cv2
 import picamera
+from picamera.array import PiRGBArray
 from PIL import Image
 from datetime import datetime
 import RPi.GPIO as GPIO
@@ -104,9 +105,17 @@ class RecordVideo(threading.Thread):
         #(self._height, self._width) = frame.shape[:2]
         print("[Recorder] can start")
         self._is_ready = True
-
+        ret = False
+        frame = None
+        rawCapture = PiRGBArray(self._camera)
+        
         while (not self._stop.is_set()):
-            ret, frame = self._camera.read()
+            if args.use_usb:
+                ret, frame = self._camera.read()
+            else:
+                ret = True
+                camera.capture(rawCapture, "jpeg", use_video_port=True)
+                frame = rawCapture.array
 
             if ret==True:
                 self._frame_lock.acquire()
@@ -392,8 +401,6 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             #img = Image.fromarray(fgmask, mode='L')
             img.save(sio, "JPEG")
-        else:
-            camera.capture(sio, "jpeg", use_video_port=True)
 
         try:
             self.write_message(base64.b64encode(sio.getvalue()))
