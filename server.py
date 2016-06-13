@@ -114,7 +114,7 @@ class RecordVideo(threading.Thread):
                 ret, frame = self._camera.read()
             else:
                 ret = True
-                camera.capture(rawCapture, "jpeg", use_video_port=True)
+                self._camera.capture(rawCapture, "jpeg", use_video_port=True)
                 frame = rawCapture.array
 
             if ret==True:
