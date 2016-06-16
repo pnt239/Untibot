@@ -366,7 +366,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """Sends camera images in an infinite loop."""
         sio = io.StringIO()
 
-        if True: #args.use_usb
+        if args.use_usb: #args.use_usb
             img = thread1.getImage()
 
             t = clock()
@@ -410,6 +410,12 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             img.save(sio, "JPEG")
         else:
             camera.capture(sio, "jpeg", use_video_port=True)
+            data = np.fromstring(sio.getvalue(), dtype=np.uint8)
+            # "Decode" the image from the array, preserving colour
+            frame = cv2.imdecode(data, 1)
+            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            #img = Image.fromarray(fgmask, mode='L')
+            img.save(sio, "JPEG")
 
         try:
             self.write_message(base64.b64encode(sio.getvalue()))
