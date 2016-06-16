@@ -1,0 +1,1 @@
+cloudcmd --root upload --port 8081

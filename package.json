@@ -1,0 +1,23 @@
+{
+  "name": "untibot",
+  "version": "1.0.0",
+  "description": "A house supervisor",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "forever start node_modules/cloudcmd/bin/cloudcmd.js --root upload --port 8081"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panoti/Untibot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/panoti/Untibot/issues"
+  },
+  "homepage": "https://github.com/panoti/Untibot#readme",
+  "dependencies": {
+    "cloudcmd": "^5.4.0"
+  }
+}
