@@ -1,0 +1,4 @@
+*.pyc
+/upload/*.avi
+/upload/*.jpg
+/node_modules

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+iframe {
+    position: absolute;
+    background: #000;
+    border: none;
+    top: 60px; right: 0;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 100%;
+}
+</style>
+{% end %}
+
+{% block title %}File Manager{% end %}
+
+{% block body %}
+<div class="snippet-group">
+    <div class="snippet-demos">
+        <div class="snippet-demo">
+            <a href="/">
+            <button id="back" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                Back
+            </button>
+            </a>
+        </div>
+    </div>
+</div>
+<iframe id="fm" src="" frameborder="0" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%"></iframe>
+<script type="text/javascript">
+(function() {
+    'use strict';
+	var hostname = window.location.hostname;
+	var port = '8081';
+	var fmIframe = document.querySelector("#fm");
+
+	fmIframe.setAttribute("src", "http://" + hostname + ':' + port + "/");
+}());
+</script>
+{% end %}
+
+{% block bottom %}{% end %}
