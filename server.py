@@ -111,16 +111,16 @@ class RecordVideo(threading.Thread):
         self._is_ready = True
         ret = False
         frame = None
-        stream = ioEx.BytesIO()
+        sio = io.StringIO()
 
         while (not self._stop.is_set()):
             if args.use_usb:
                 ret, frame = self._camera.read()
             else:
                 ret = True
-                self._camera.capture(stream, format='jpeg', use_video_port=True)
+                self._camera.capture(sio, format='jpeg', use_video_port=True)
                 # Construct a numpy array from the stream
-                data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+                data = np.fromstring(sio.getvalue(), dtype=np.uint8)
                 # "Decode" the image from the array, preserving colour
                 frame = cv2.imdecode(data, 1)
 
