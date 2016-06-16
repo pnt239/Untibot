@@ -39,6 +39,8 @@ with open(os.path.join(ROOT, "password.txt")) as in_file:
 COOKIE_NAME = "camp"
 
 uploadDir = os.path.join(ROOT, "upload/")
+
+camera = None
 thread1 = None
 detector = None
 args = None
@@ -110,7 +112,7 @@ class RecordVideo(threading.Thread):
         ret = False
         frame = None
         stream = ioEx.BytesIO()
-        
+
         while (not self._stop.is_set()):
             if args.use_usb:
                 ret, frame = self._camera.read()
@@ -282,7 +284,7 @@ class MotionDetection(threading.Thread):
     def removeNoise(self):
         frame = self._video.getImage()
         self._fgbg.apply(frame)
-        
+
     def hasMotion(self):
         return self._hasMotion
 
@@ -382,13 +384,13 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                     padding=(8, 8), scale=1.05)
                 rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
                 rects = non_max_suppression(rects, probs=None, overlapThresh=0.65)
-                
+
             if detector.hasMotion():
                 if len(rects) == 0:
                     GPIO.output(18, GPIO.LOW)
                 else:
                     GPIO.output(18, GPIO.HIGH)
-                    
+
 
             draw_rects(img, rects, (0, 255, 0))
             #if not self.nested.empty():
@@ -418,6 +420,7 @@ def main():
     global thread1
     global detector
     global args
+    global camera
     # Commandline parser
     parser = argparse.ArgumentParser(description="Starts a webserver that "
                         "connects to a webcam.")
@@ -431,7 +434,6 @@ def main():
                         "webcam instead of the standard Pi camera.")
     args = parser.parse_args()
 
-    camera = None
     camera_width = None
     camera_height = None
 
@@ -441,8 +443,6 @@ def main():
     else:
         camera = picamera.PiCamera()
         camera.start_preview()
-
-    
 
     if args.resolution in resolutions:
         camera_width, camera_height = resolutions[args.resolution]
